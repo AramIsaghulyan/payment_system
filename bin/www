@@ -1,0 +1,23 @@
+require('dotenv').config({ quiet: true });
+
+const app = require('../src/app');
+const { connectDatabase, initDatabase } = require('../src/configs/database');
+const { connectRedis } = require('../src/configs/redis');
+
+async function start() {
+  try {
+    await connectDatabase();
+    await initDatabase();
+    await connectRedis();
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`${process.env.APP_NAME} is running on port ${PORT} (${process.env.NODE_ENV})`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+start();
