@@ -1,17 +1,29 @@
-const { createUser } = require('../database/queries/userQueries');
+const { create, findByEmail, findById } = require('../database/queries/userQueries');
+const bcrypt = require('bcrypt');
 
 class UserService {
-  constructor() {}
 
-  async createUser(name, surname, email, password) {
-    try {
-      const user = await createUser(name, surname, email, password);
-      return user;
-    } catch (error) {
-      throw error;
+  constructor() {};
+
+  async create(name, surname, email, password) {
+    const foundUser = await findByEmail(email);
+    if (foundUser) {
+      throw new Error('This email address already exists.');
     }
+    const hash = await bcrypt.hash(password, 12);
+    const user = await create(name, surname, email, hash);
+    delete user.password;
+    return user;
   }
 
+  async findById(id) {
+    const foundUser = await findById(id);
+    if (!foundUser) {
+      throw new Error('Wrong id.');
+    }
+    delete foundUser.password;
+    return foundUser;
+  }
 }
 
 module.exports = new UserService();
