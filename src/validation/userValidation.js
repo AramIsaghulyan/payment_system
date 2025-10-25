@@ -8,6 +8,6 @@ module.exports = {
     password: Joi.password().min(8).max(255).strong().required(),
   },
   findById: {
-    id: Joi.number().required()
-  }
+    id: Joi.number().required(),
+  },
 };

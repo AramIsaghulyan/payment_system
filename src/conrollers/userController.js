@@ -8,25 +8,32 @@ const Response = require('../utils/response');
 
 const router = express.Router();
 
-router.get('/:id', authMiddleware, requestMiddleware(async (req, res) => {
-  try {
-    const { id } = await validate(req.params, userValidation.findById);
-    const user = await userService.findById(id);
-    return res.status(200).json(new Response(user));
-  } catch (error) {
-    return res.status(400).json(new Response({}, error));
-  }
-}));
+router.get(
+  '/:id',
+  authMiddleware,
+  requestMiddleware(async (req, res) => {
+    try {
+      const { id } = await validate(req.params, userValidation.findById);
+      const user = await userService.findById(id);
+      return res.status(200).json(new Response(user));
+    } catch (error) {
+      return res.status(400).json(new Response({}, error));
+    }
+  })
+);
 
-router.post('/', requestMiddleware(async (req, res) => {
-  try {
-    const { name, surname, email, password } = await validate(req.body, userValidation.create);
-    const user = await userService.create(name, surname, email, password);
-    return res.status(200).json(new Response(user));
-  } catch (error) {
-    return res.status(400).json(new Response({}, error));
-  }
-}));
+router.post(
+  '/',
+  requestMiddleware(async (req, res) => {
+    try {
+      const { name, surname, email, password } = await validate(req.body, userValidation.create);
+      const user = await userService.create(name, surname, email, password);
+      return res.status(200).json(new Response(user));
+    } catch (error) {
+      return res.status(400).json(new Response({}, error));
+    }
+  })
+);
 
 // router.get('/users', async (req, res) => {
 //   try {

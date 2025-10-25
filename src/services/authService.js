@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({ quiet: true });
-const { findByEmail  } = require('../database/queries/userQueries');
+const { findByEmail } = require('../database/queries/userQueries');
 
 class AuthService {
   constructor() {}

@@ -10,4 +10,3 @@ const requestMiddleware = (middleware) => {
 };
 
 module.exports = requestMiddleware;
-

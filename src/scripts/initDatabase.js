@@ -13,13 +13,11 @@ const pool = new Pool({
 
 async function initDatabase() {
   const sqlDir = path.resolve(__dirname, '../database/schemes');
-  const files = fs.readdirSync(sqlDir).filter(file => file.endsWith('.sql'));
-
+  const files = fs.readdirSync(sqlDir).filter((file) => file.endsWith('.sql'));
   for (const file of files) {
     const sql = fs.readFileSync(path.join(sqlDir, file), 'utf8');
     await pool.query(sql);
   }
-  
   await pool.end();
   console.log('All schemas initialized successfully.');
 }

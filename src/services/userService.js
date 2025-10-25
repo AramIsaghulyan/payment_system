@@ -2,8 +2,7 @@ const { create, findByEmail, findById } = require('../database/queries/userQueri
 const bcrypt = require('bcrypt');
 
 class UserService {
-
-  constructor() {};
+  constructor() {}
 
   async create(name, surname, email, password) {
     const foundUser = await findByEmail(email);
