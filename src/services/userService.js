@@ -5,10 +5,6 @@ class UserService {
   constructor() {}
 
   async create(name, surname, email, password) {
-    const foundUser = await findByEmail(email);
-    if (foundUser) {
-      throw new Error('This email address already exists.');
-    }
     const hash = await bcrypt.hash(password, 12);
     const user = await create(name, surname, email, hash);
     delete user.password;
