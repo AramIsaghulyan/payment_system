@@ -1,23 +1,32 @@
-const { create, findByEmail, findById } = require('../database/queries/userQueries');
-const bcrypt = require('bcrypt');
+const userRepository = require('../database/repositories/userRepository');
 
 class UserService {
   constructor() {}
 
+  async findUserWithAccountsById(userId) {
+    const foundUser = await userRepository.findUserWithAccountsById(userId);
+    if (!foundUser) {
+      throw new Error('There is no user with this user id.');
+    }
+    return foundUser;
+  }
+
   async create(name, surname, email, password) {
-    const hash = await bcrypt.hash(password, 12);
-    const user = await create(name, surname, email, hash);
-    delete user.password;
+    const foundUser = await userRepository.findByEmail(email);
+    if (foundUser) {
+      throw new Error('User with this email already exists.');
+    }
+    const user = await userRepository.create(name, surname, email, password);
     return user;
   }
 
-  async findById(id) {
-    const foundUser = await findById(id);
+  async update(userId, fields) {
+    const foundUser = await userRepository.findById(userId);
     if (!foundUser) {
-      throw new Error('Wrong id.');
+      throw new Error('There is no user with this user id.');
     }
-    delete foundUser.password;
-    return foundUser;
+    const user = await userRepository.update(userId, fields);
+    return user;
   }
 }
 

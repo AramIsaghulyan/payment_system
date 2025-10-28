@@ -24,7 +24,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger: call the function before each row update
-CREATE TRIGGER trg_users_updated_at
+CREATE OR REPLACE TRIGGER trg_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_users_updated_at();
@@ -58,11 +58,49 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger: call the function before each row update
-CREATE TRIGGER trg_accounts_updated_at
+CREATE OR REPLACE TRIGGER trg_accounts_updated_at
 BEFORE UPDATE ON accounts
 FOR EACH ROW
 EXECUTE FUNCTION update_accounts_updated_at();
+
+
+-- ==========================================================
+-- TRANSACTION TABLE
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS transactions (
+  transaction_id INT GENERATED ALWAYS AS IDENTITY,
+  account_id INT NOT NULL,
+  type VARCHAR(20) NOT NULL,
+  amount NUMERIC(12,2) NOT NULL,
+  direction VARCHAR(10) NOT NULL,
+  currency VARCHAR(10) DEFAULT 'USD',
+  reference_id INT,                       
+  status VARCHAR(20) DEFAULT 'success',
+  message TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+
+  CONSTRAINT pk_transactions PRIMARY KEY (transaction_id),
+  CONSTRAINT fk_account FOREIGN KEY (account_id)
+    REFERENCES accounts(account_id) ON DELETE CASCADE,
+  CONSTRAINT chk_amount CHECK (amount > 0),
+  CONSTRAINT chk_direction  CHECK (direction IN ('debit', 'credit')),
+  CONSTRAINT chk_type CHECK (type IN ('transfer', 'deposit', 'withdraw', 'rollback'))
+);
+
+CREATE OR REPLACE FUNCTION update_transactions_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_transactions_updated_at
+BEFORE UPDATE ON transactions
+FOR EACH ROW
+EXECUTE FUNCTION update_transactions_updated_at();
 
 
 -- ==========================================================

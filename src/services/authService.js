@@ -1,22 +1,23 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({ quiet: true });
-const { findByEmail } = require('../database/queries/userQueries');
+const userRepository = require('../database/repositories/userRepository');
 
 class AuthService {
   constructor() {}
 
   async generateToken(email, password) {
-    const user = await findByEmail(email);
+    const user = await userRepository.findByEmail(email);
     if (!user) {
       throw new Error('Invalid credentials');
     }
+    console.log(user)
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new Error('Invalid credentials');
     }
     const payload = {
-      id: user.id,
+      userId: user.id,
       email: user.email,
     };
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });

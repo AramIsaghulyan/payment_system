@@ -8,6 +8,20 @@ module.exports = {
     password: Joi.password().min(8).max(255).strong().required(),
   },
   findById: {
-    id: Joi.number().required(),
+    userId: Joi.number().required(),
+  },
+  update: {
+    userId: Joi.number().required(),
+    name: Joi.string().min(2).max(100).optional(),
+    surname: Joi.string().min(2).max(100).optional(),
+    email: Joi.string().email().max(150).optional(),
+    password: Joi.password().min(8).max(255).strong().optional(),
+    oldPassword: Joi.string().when('password', {
+      is: Joi.exist(),
+      then: Joi.required().messages({
+        'any.required': '"oldPassword" is required when changing password',
+      }),
+      otherwise: Joi.forbidden(),
+    }),
   },
 };

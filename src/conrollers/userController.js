@@ -9,12 +9,12 @@ const Response = require('../utils/response');
 const router = express.Router();
 
 router.get(
-  '/:id',
+  '/:userId',
   authMiddleware,
   requestMiddleware(async (req, res) => {
     try {
-      const { id } = await validate(req.params, userValidation.findById);
-      const user = await userService.findById(id);
+      const { userId } = await validate(req.params, userValidation.findById);
+      const user = await userService.findUserWithAccountsById(userId);
       return res.status(200).json(new Response(user));
     } catch (error) {
       return res.status(400).json(new Response({}, error));
@@ -35,28 +35,21 @@ router.post(
   })
 );
 
-// router.get('/users', async (req, res) => {
-//   try {
-//     // 1️⃣ Check cache
-//     const cache = await redisClient.get('customers');
-//     if (cache) {
-//       console.log('📦 Returned from Redis cache');
-//       return res.json(JSON.parse(cache));
-//     }
-
-//     // 2️⃣ If not cached, query PostgreSQL
-//     const result = await pool.query('SELECT * FROM customers;');
-//     const users = result.rows;
-
-//     // 3️⃣ Save to Redis for 30 seconds
-//     await redisClient.setEx('customers', 30, JSON.stringify(users));
-
-//     console.log('🧠 Returned from PostgreSQL and saved to cache');
-//     res.json(users);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send('Server error');
-//   }
-// });
+router.patch(
+  '/:userId',
+  authMiddleware,
+  requestMiddleware(async (req, res) => {
+    try {
+      console.log(req.params)
+      const reqData = { ...req.params, ...req.body };
+      const validData = await validate(reqData, userValidation.update);
+      const { userId, ...fields } = validData;
+      const user = await userService.update(userId, fields);
+      return res.status(200).json(new Response(user));
+    } catch (error) {
+      return res.status(400).json(new Response({}, error));
+    }
+  })
+);
 
 module.exports = router;
