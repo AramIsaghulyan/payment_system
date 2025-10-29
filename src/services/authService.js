@@ -7,11 +7,10 @@ class AuthService {
   constructor() {}
 
   async generateToken(email, password) {
-    const user = await userRepository.findByEmail(email);
+    const user = await userRepository.findUserWithAccountsByEmail(email);
     if (!user) {
       throw new Error('Invalid credentials');
     }
-    console.log(user)
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new Error('Invalid credentials');

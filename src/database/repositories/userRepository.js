@@ -30,10 +30,10 @@ class UserRepository {
     `;
   }
 
-  async findUserWithAccountsById(id) {
+  async findUserWithAccountsById(userId) {
   try {
     const query = this.generateSelectByAction('user_id');
-    const { rows } = await this.pool.query(query, [id]);
+    const { rows } = await this.pool.query(query, [userId]);
     return rows[0];
   } catch (error) {
     console.error('DB error in find user by id:', error.message);
@@ -42,10 +42,9 @@ class UserRepository {
 }
 
 
-  async findByEmail(email) {
+  async findUserWithAccountsByEmail(email) {
     try {
       const query = this.generateSelectByAction('email');
-      console.log(query)
       const { rows } = await this.pool.query(query, [email]);
       return rows[0];
     } catch (error) {
@@ -56,15 +55,13 @@ class UserRepository {
 
   async create(name, surname, email, password) {
     const hashed = await bcrypt.hash(password, PASSWORD_HASH_ROUNDS);
-    const client = await this.pool.connect();
     try {
-      const insertUser = `
+      const query = `
         INSERT INTO users (name, surname, email, password)
         VALUES ($1, $2, $3, $4)
         RETURNING user_id, name, surname, email;
       `;
-      const { rows } = await client.query(insertUser, [name, surname, email, hashed]);
-      delete user.password;
+      const { rows } = await this.pool.query(query, [name, surname, email, hashed]);
       return rows[0];
     } catch (error) {
       console.error('DB error in create user:', error.message);

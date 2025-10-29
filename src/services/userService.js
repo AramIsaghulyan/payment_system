@@ -12,7 +12,7 @@ class UserService {
   }
 
   async create(name, surname, email, password) {
-    const foundUser = await userRepository.findByEmail(email);
+    const foundUser = await userRepository.findUserWithAccountsByEmail(email);
     if (foundUser) {
       throw new Error('User with this email already exists.');
     }

@@ -1,12 +1,12 @@
 require('dotenv').config({ quiet: true });
 
 const app = require('../src/app');
-const { connectDatabase } = require('../src/configs/postgres');
+const db = require('../src/configs/postgres');
 const { connectRedis } = require('../src/configs/redis');
 
 async function start() {
   try {
-    await connectDatabase();
+    await db.connect();
     await connectRedis();
 
     const PORT = process.env.PORT || 3000;
