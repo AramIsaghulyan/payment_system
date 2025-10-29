@@ -9,8 +9,18 @@ class AccountService {
     if (!foundUser) {
       throw new Error('There is no user with this Id.');
     }
-    const user = await accountRepository.create(userId);
-    return user;
+    const account = await accountRepository.create(userId);
+    return account;
+  }
+
+  async verifySenderAccount(userId, cardNumber) {
+    const verifiedAccount = await accountRepository.verifySenderAccount(userId, cardNumber);
+    return verifiedAccount;
+  }
+
+  async isValidCardNumber(cardNumber) {
+    const isValid = await accountRepository.isValidCardNumber(cardNumber);
+    return isValid;
   }
 }
 

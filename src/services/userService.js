@@ -21,7 +21,7 @@ class UserService {
   }
 
   async update(userId, fields) {
-    const foundUser = await userRepository.findById(userId);
+    const foundUser = await userRepository.findUserWithAccountsById(userId);
     if (!foundUser) {
       throw new Error('There is no user with this user id.');
     }

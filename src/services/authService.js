@@ -16,7 +16,7 @@ class AuthService {
       throw new Error('Invalid credentials');
     }
     const payload = {
-      userId: user.id,
+      userId: user.user_id,
       email: user.email,
     };
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });

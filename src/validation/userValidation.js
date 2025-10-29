@@ -7,14 +7,9 @@ module.exports = {
     email: Joi.string().email().max(150).required(),
     password: Joi.password().min(8).max(255).strong().required(),
   },
-  findById: {
-    userId: Joi.number().required(),
-  },
   update: {
-    userId: Joi.number().required(),
     name: Joi.string().min(2).max(100).optional(),
     surname: Joi.string().min(2).max(100).optional(),
-    email: Joi.string().email().max(150).optional(),
     password: Joi.password().min(8).max(255).strong().optional(),
     oldPassword: Joi.string().when('password', {
       is: Joi.exist(),

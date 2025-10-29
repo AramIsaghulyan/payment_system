@@ -9,11 +9,11 @@ const Response = require('../utils/response');
 const router = express.Router();
 
 router.get(
-  '/:userId',
+  '/',
   authMiddleware,
   requestMiddleware(async (req, res) => {
     try {
-      const { userId } = await validate(req.params, userValidation.findById);
+      const { userId } = req.user;
       const user = await userService.findUserWithAccountsById(userId);
       return res.status(200).json(new Response(user));
     } catch (error) {
@@ -36,14 +36,12 @@ router.post(
 );
 
 router.patch(
-  '/:userId',
+  '/',
   authMiddleware,
   requestMiddleware(async (req, res) => {
     try {
-      console.log(req.params)
-      const reqData = { ...req.params, ...req.body };
-      const validData = await validate(reqData, userValidation.update);
-      const { userId, ...fields } = validData;
+      const { userId } = req.user
+      const fields = await validate(req.body, userValidation.update);
       const user = await userService.update(userId, fields);
       return res.status(200).json(new Response(user));
     } catch (error) {
