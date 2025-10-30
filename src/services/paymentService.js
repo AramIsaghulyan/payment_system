@@ -5,13 +5,13 @@ class PaymentService {
   constructor() {}
 
   async transfer(userId, senderCardNumber, receiverCardNumber, amount) {
-    const senderAccountId = await accountService.verifySenderAccount(userId, senderCardNumber);
-    if (!senderAccountId) {
+    const sender = await accountService.verifySenderAccount(userId, senderCardNumber);
+    if (!sender) {
       throw new Error('User does not own this card.');
     }
-    const receiverAccountId = await accountService.isValidCardNumber(receiverCardNumber);
-    if (!receiverAccountId) {
-      throw new Error('Card number is not valid.')
+    const receiver = await accountService.isValidCardNumber(receiverCardNumber);
+    if (!receiver) {
+      throw new Error('Card number is not valid.');
     }
     if (senderCardNumber === receiverCardNumber) {
       throw new Error('Cannot transfer to the same account.');
@@ -19,17 +19,29 @@ class PaymentService {
     if (amount <= 0) {
       throw new Error('Invalid amount.');
     }
-    return await transactionRepository.transfer(senderAccountId, receiverAccountId, amount);
+    return await transactionRepository.transfer(sender.accountId, receiver.accountId, amount);
   }
 
-  async deposit(accountId, amount) {
-    if (amount <= 0) throw new Error('Invalid amount.');
-    return await transactionRepository.deposit(accountId, amount);
+  async deposit(userId, amount) {
+    const account = await accountService.findByUserId(userId);
+    if (!account) {
+      throw new Error('There is no account with this user Id.');
+    }
+    if (amount <= 0) {
+      throw new Error('Invalid amount.');
+    }
+    return await transactionRepository.deposit(account.accountId, amount);
   }
 
-  async withdraw(accountId, amount) {
-    if (amount <= 0) throw new Error('Invalid amount.');
-    return await transactionRepository.withdraw(accountId, amount);
+  async withdraw(userId, amount) {
+    const account = await accountService.findByUserId(userId);
+    if (!account) {
+      throw new Error('There is no account with this user Id.');
+    }
+    if (amount <= 0) {
+      throw new Error('Invalid amount.');
+    }
+    return await transactionRepository.withdraw(account.accountId, amount);
   }
 }
 

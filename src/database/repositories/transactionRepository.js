@@ -82,17 +82,13 @@ class TransactionRepository {
       await client.query('BEGIN');
 
       await client.query('UPDATE accounts SET balance = balance + $1 WHERE account_id = $2', [amount, accountId]);
-      const {
-        rows: [tx],
-      } = await client.query(
-        `
+      const query = `
         INSERT INTO transactions (account_id, type, amount, direction, message)
         VALUES ($1, 'deposit', $2, 'credit', $3)
         RETURNING transaction_id
-        `,
-        [accountId, amount, `Deposit ${amount} USD`]
-      );
-
+      `;
+      // prettier-ignore
+      const { rows: [tx] } = await client.query(query, [accountId, amount, `Deposit ${amount} USD`]);
       await client.query('COMMIT');
       return tx;
     } catch (err) {
@@ -107,25 +103,32 @@ class TransactionRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-
-      const {
-        rows: [account],
-      } = await client.query('SELECT balance FROM accounts WHERE account_id = $1 FOR UPDATE', [accountId]);
-      if (!account) throw new Error('Account not found');
-      if (account.balance < amount) throw new Error('Insufficient funds');
-
-      await client.query('UPDATE accounts SET balance = balance - $1 WHERE account_id = $2', [amount, accountId]);
-      const {
-        rows: [tx],
-      } = await client.query(
-        `
+      const selectBalanceQuery = `
+        SELECT balance
+        FROM accounts
+        WHERE account_id = $1 FOR UPDATE
+      `;
+      // prettier-ignore
+      const { rows: [account] } = await client.query(selectBalanceQuery, [accountId]);
+      if (!account) {
+        throw new Error('Account not found');
+      }
+      if (account.balance < amount) {
+        throw new Error('Insufficient funds');
+      }
+      const updateBalanceQuery = `
+        UPDATE accounts
+        SET balance = balance - $1
+        WHERE account_id = $2
+      `
+      await client.query(updateBalanceQuery, [amount, accountId]);
+      const insertTXQuery = `
         INSERT INTO transactions (account_id, type, amount, direction, message)
         VALUES ($1, 'withdraw', $2, 'debit', $3)
         RETURNING transaction_id
-        `,
-        [accountId, amount, `Withdraw ${amount} USD`]
-      );
-
+      `
+      // prettier-ignore
+      const { rows: [tx] } = await client.query(insertTXQuery, [accountId, amount, `Withdraw ${amount} USD`]);
       await client.query('COMMIT');
       return tx;
     } catch (err) {

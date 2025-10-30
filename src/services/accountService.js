@@ -22,6 +22,11 @@ class AccountService {
     const isValid = await accountRepository.isValidCardNumber(cardNumber);
     return isValid;
   }
+
+  async findByUserId(userId) {
+    const account = await accountRepository.findByUserId(userId);
+    return account;
+  }
 }
 
 module.exports = new AccountService();

@@ -33,8 +33,9 @@ class UserRepository {
   async findUserWithAccountsById(userId) {
   try {
     const query = this.generateSelectByAction('user_id');
-    const { rows } = await this.pool.query(query, [userId]);
-    return rows[0];
+    const { rows: [user] } = await this.pool.query(query, [userId]);
+    console.log(user)
+    return user;
   } catch (error) {
     console.error('DB error in find user by id:', error.message);
     throw new Error(`Database error: ${error.message}`);
@@ -45,8 +46,8 @@ class UserRepository {
   async findUserWithAccountsByEmail(email) {
     try {
       const query = this.generateSelectByAction('email');
-      const { rows } = await this.pool.query(query, [email]);
-      return rows[0];
+      const { rows: [user] } = await this.pool.query(query, [email]);
+      return user;
     } catch (error) {
       console.error('DB error in find user by email:', error.message);
       throw new Error(`Database error: ${error.message}`);
@@ -61,18 +62,18 @@ class UserRepository {
         VALUES ($1, $2, $3, $4)
         RETURNING user_id, name, surname, email;
       `;
-      const { rows } = await this.pool.query(query, [name, surname, email, hashed]);
-      return rows[0];
+      const { rows: [user] } = await this.pool.query(query, [name, surname, email, hashed]);
+      return user;
     } catch (error) {
       console.error('DB error in create user:', error.message);
       throw new Error(`Database error: ${error.message}`);
     }
   }
 
-  async update(userId, fields) {
+  async update(userId, foundPassword, fields) {
     try {
       if (fields.password && fields.oldPassword) {
-        const isMatch = await bcrypt.compare(fields.oldPassword, user.password);
+        const isMatch = await bcrypt.compare(fields.oldPassword, foundPassword);
         if (!isMatch) {
           throw new Error('Invalid old password');
         }
@@ -88,8 +89,8 @@ class UserRepository {
         RETURNING user_id, name, surname, email;
       `;
       values.push(userId);
-      const { rows } = await this.pool.query(sql, values);
-      return rows[0];
+      const { rows: [user] } = await this.pool.query(sql, values);
+      return user;
     } catch (error) {
       console.error('DB error in update user:', error.message);
       throw new Error(`Database error: ${error.message}`);

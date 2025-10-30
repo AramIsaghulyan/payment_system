@@ -6,7 +6,7 @@ class UserService {
   async findUserWithAccountsById(userId) {
     const foundUser = await userRepository.findUserWithAccountsById(userId);
     if (!foundUser) {
-      throw new Error('There is no user with this user id.');
+      throw new Error('There is no user with this user Id.');
     }
     return foundUser;
   }
@@ -20,12 +20,14 @@ class UserService {
     return user;
   }
 
-  async update(userId, fields) {
-    const foundUser = await userRepository.findUserWithAccountsById(userId);
+  async update(userId, email, fields) {
+    const foundUser = await userRepository.findUserWithAccountsByEmail(email);
+    console.log(foundUser)
     if (!foundUser) {
-      throw new Error('There is no user with this user id.');
+      throw new Error('There is no user with this user Id.');
     }
-    const user = await userRepository.update(userId, fields);
+    console.log('stexa')
+    const user = await userRepository.update(userId, foundUser.password, fields);
     return user;
   }
 }

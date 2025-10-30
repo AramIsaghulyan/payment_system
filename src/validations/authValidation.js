@@ -1,4 +1,4 @@
-const { Joi } = require('../utils/validation');
+const { Joi } = require('../configs/joi');
 
 module.exports = {
   login: {

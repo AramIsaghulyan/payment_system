@@ -107,28 +107,51 @@ EXECUTE FUNCTION update_transactions_updated_at();
 -- INSERT INTO FOR USERS
 -- ==========================================================
 
-INSERT INTO users (name, surname, email, password)
-VALUES
-('Aram', 'Isaghulyan', 'aram@example.com', 'hashed_password_1'),
-('Lilit', 'Hakobyan', 'lilit@example.com', 'hashed_password_2'),
-('Tigran', 'Mkrtchyan', 'tigran@example.com', 'hashed_password_3'),
-('Anna', 'Sargsyan', 'anna@example.com', 'hashed_password_4'),
-('Karen', 'Vardanyan', 'karen@example.com', 'hashed_password_5'),
-('Mariam', 'Grigoryan', 'mariam@example.com', 'hashed_password_6'),
-('Hayk', 'Petrosyan', 'hayk@example.com', 'hashed_password_7'),
-('Sona', 'Harutyunyan', 'sona@example.com', 'hashed_password_8'),
-('Vahagn', 'Ghazaryan', 'vahagn@example.com', 'hashed_password_9'),
-('Narek', 'Stepanyan', 'narek@example.com', 'hashed_password_10'),
-('Ani', 'Karapetyan', 'ani@example.com', 'hashed_password_11'),
-('David', 'Melikyan', 'david@example.com', 'hashed_password_12'),
-('Lusine', 'Avetisyan', 'lusine@example.com', 'hashed_password_13'),
-('Edgar', 'Manukyan', 'edgar@example.com', 'hashed_password_14'),
-('Marine', 'Asatryan', 'marine@example.com', 'hashed_password_15'),
-('Artur', 'Khachatryan', 'artur@example.com', 'hashed_password_16'),
-('Armine', 'Sahakyan', 'armine@example.com', 'hashed_password_17'),
-('Arsen', 'Hovhannisyan', 'arsen@example.com', 'hashed_password_18'),
-('Kristine', 'Gevorgyan', 'kristine@example.com', 'hashed_password_19'),
-('Gor', 'Simonyan', 'gor@example.com', 'hashed_password_20');
+INSERT INTO users (name, surname, email, password) VALUES
+('Aram', 'Isaghulyan', 'aram@example.com', '$2b$12$0ON1xIe.KGrLk5mFjGdjZeS5KOR1j5KhpzlzyI49XktD9KJnFDWNq'),
+('Lilit', 'Hakobyan', 'lilit@example.com', '$2b$12$klmc/d34dqWMD0TqZJ5VfudsMWoxtQB3Ibm6nekCh8e3/e2x4W.A2'),
+('Tigran', 'Mkrtchyan', 'tigran@example.com', '$2b$12$LPdYf/D9.VuS8nLMVE.qYe4tEH5yiQpauZgmYXr8bl8rElfAY3YYy'),
+('Anna', 'Sargsyan', 'anna@example.com', '$2b$12$NesiV6llfaKrr2U0tvsFX.wovSzFHSX1Lc4mzvJ6GbmyZP/q0Joj6'),
+('Karen', 'Vardanyan', 'karen@example.com', '$2b$12$LdzBB0El80UI36RWqS9dcu99QvHxTqNFkFsfp0Qg4T7nIWtG3oXa2'),
+('Mariam', 'Grigoryan', 'mariam@example.com', '$2b$12$Or9inqDdwK9v1y.z/KWPA.IMIr2yNMkrsreHdZz.6nrlpVNPWxn2.'),
+('Hayk', 'Petrosyan', 'hayk@example.com', '$2b$12$RziFqjVtX0MAk9GQu95V2uRAhv9RY6eqkM9ptQzB9LvdChh3A.Ez.'),
+('Sona', 'Harutyunyan', 'sona@example.com', '$2b$12$70sz0gYDMgyGMKYsjm3y6ersvdMERo63OnQEA0fYJVdBZU.HqtsAm'),
+('Vahagn', 'Ghazaryan', 'vahagn@example.com', '$2b$12$qjwnwjuvmZSJDX9t3pTOeu6Q5gx984rxQeaRiZDGDFBSind9JlKD2'),
+('Narek', 'Stepanyan', 'narek@example.com', '$2b$12$buRsEE8CDT502/GzsdUalOgO1wSIInkhsuwAjBhy862COuDF3mxcm'),
+('Ani', 'Karapetyan', 'ani@example.com', '$2b$12$aV8dnl7tId16f.gK8b6sx.nML5zl/NFZhidzvoq.Mh/yTPsiXH/GC'),
+('David', 'Melikyan', 'david@example.com', '$2b$12$6WD6BV0YlfWAUJkn5b/P3ekj/q2lK7/wqsXsIJuURvHuWHXh9ax7C'),
+('Lusine', 'Avetisyan', 'lusine@example.com', '$2b$12$TI00V4irr5k1dZjBA2EHJON.hA0eT2bEU1BtbGr8i0hLC74jJCUfS'),
+('Edgar', 'Manukyan', 'edgar@example.com', '$2b$12$uU47o6k0Y6piKakN5oWE2OvI3T7DRG4FW2SieaOFo7RlUTej3gyAq'),
+('Marine', 'Asatryan', 'marine@example.com', '$2b$12$5Ei3ric6m0gS5I2T8JImx.SLNIOEs/LG1ruU9u8L4svaPG3SwTbGG'),
+('Artur', 'Khachatryan', 'artur@example.com', '$2b$12$MIFcXcoZK7VVgrEjCa0d4e1D1QSOT2.qj5be/b9M.lbtOcgPOBssC'),
+('Armine', 'Sahakyan', 'armine@example.com', '$2b$12$JJ0iFOBa1bRo3iKpyu.WfOOPSbT3hya6kwnZZjachd9GD6v7AGVWG'),
+('Arsen', 'Hovhannisyan', 'arsen@example.com', '$2b$12$HtTJ.lFZjQpEdqfTaMFBVuF8m8qINR5EMMRQdtr.El43IeyuxGBje'),
+('Kristine', 'Gevorgyan', 'kristine@example.com', '$2b$12$V78MIoncO7zQstXW6/a5F.cInAIImnLHMDrV/3Kq9uPK0puFAtjuC'),
+('Gor', 'Simonyan', 'gor@example.com', '$2b$12$jA838VUQxjXsidgbsaZm5.fVNT52DcjjUD83FZLLDu5gQilQWoF4K');
+
+-- ==========================================================
+-- REAL PASSWORDS
+-- 1.  Aram123$
+-- 2.  Lilit123$
+-- 3.  Tigran123$
+-- 4.  Anna123$
+-- 5.  Karen123$
+-- 6.  Mariam123$
+-- 7.  Hayk123$
+-- 8.  Sona123$
+-- 9.  Vahagn123$
+-- 10. Narek123$
+-- 11. Ani1234$
+-- 12. David123$
+-- 13. Lusine123$
+-- 14. Edgar123$
+-- 15. Marine123$
+-- 16. Artur123$
+-- 17. Armine123$
+-- 18. Arsen123$
+-- 19. Kristine123$
+-- 20. Gor1234$
+-- ==========================================================
 
 
 -- ==========================================================

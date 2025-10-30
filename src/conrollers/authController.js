@@ -1,7 +1,7 @@
 const express = require('express');
 const authService = require('../services/authService');
 const requestMiddleware = require('../middlewares/requestMiddleware');
-const { validate } = require('../utils/validation');
+const { validate } = require('../configs/joi');
 const authValidation = require('../validations/authValidation');
 const Response = require('../utils/response');
 
