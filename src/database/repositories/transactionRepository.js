@@ -7,6 +7,8 @@ class TransactionRepository {
 
   async transfer(senderAccountId, receiverAccountId, amount) {
     const client = await this.pool.connect();
+    let debitTx;
+    let creditTx;
     try {
       await client.query('BEGIN');
       const selectQuery = `
@@ -23,43 +25,43 @@ class TransactionRepository {
       if (sender.balance < amount) {
         throw new Error('Insufficient funds');
       }
-      const updateQuerySender = `
-        UPDATE accounts
-        SET balance = balance - $1
-        WHERE account_id = $2
-      `;
-      await client.query(updateQuerySender, [amount, senderAccountId]);
-      const updateQueryReceiver = `
-        UPDATE accounts
-        SET balance = balance + $1
-        WHERE account_id = $2
-      `;
-      await client.query(updateQueryReceiver, [amount, receiverAccountId]);
-      const debitQuery = `
-        INSERT INTO transactions (account_id, type, amount, direction, message)
-        VALUES ($1, 'transfer', $2, 'debit', $3)
-        RETURNING transaction_id
-      `;
-      // prettier-ignore
-      const { rows: [debitTx] } = await client.query(debitQuery,[ 
+      debitTx = await this._createTransaction(client, {
+        accountId: senderAccountId,
         senderAccountId,
-        amount,
-        `Sent ${amount} USD to account ${receiverAccountId}`
-      ]);
-
-      const creditSql = `
-        INSERT INTO transactions (account_id, type, amount, direction, reference_id, message)
-        VALUES ($1, 'transfer', $2, 'credit', $3, $4)
-        RETURNING transaction_id
-      `;
-      // prettier-ignore
-      const { rows: [creditTx] } = await client.query(creditSql, [
         receiverAccountId,
         amount,
-        debitTx.transaction_id,
-        `Received ${amount} USD from account ${senderAccountId}`
-      ]);
-
+        type: 'transfer',
+        direction: 'debit',
+        status: 'pending',
+      });
+      creditTx = await this._createTransaction(client, {
+        accountId: receiverAccountId,
+        senderAccountId,
+        receiverAccountId,
+        amount,
+        type: 'transfer',
+        direction: 'credit',
+        referenceId: debitTx.transaction_id,
+        status: 'pending',
+      });
+      await this._updateBalance(client, senderAccountId, amount, 'debit');
+      await this._updateBalance(client, receiverAccountId, amount, 'credit');
+      await this._updateTxStatus(client, {
+        transactionId: debitTx.transaction_id,
+        senderAccountId,
+        receiverAccountId,
+        amount,
+        status: 'success',
+        direction: 'debit',
+      });
+      await this._updateTxStatus(client, {
+        transactionId: creditTx.transaction_id,
+        senderAccountId,
+        receiverAccountId,
+        amount,
+        status: 'success',
+        direction: 'credit',
+      });
       await client.query('COMMIT');
 
       return {
@@ -67,9 +69,15 @@ class TransactionRepository {
         debitTx,
         creditTx,
       };
-    } catch (err) {
+    } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Transfer failed:', err.message);
+      console.error('Transfer failed:', error.message);
+      if (debitTx?.transaction_id) {
+        await this._updateTxStatus(this.pool, { transactionId: debitTx.transaction_id, status: 'failed', errorMessage: error.message });
+      }
+      if (creditTx?.transaction_id) {
+        await this._updateTxStatus(this.pool, { transactionId: creditTx.transaction_id, status: 'failed', errorMessage: error.message });
+      }
       throw err;
     } finally {
       client.release();
@@ -80,20 +88,15 @@ class TransactionRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-
-      await client.query('UPDATE accounts SET balance = balance + $1 WHERE account_id = $2', [amount, accountId]);
-      const query = `
-        INSERT INTO transactions (account_id, type, amount, direction, message)
-        VALUES ($1, 'deposit', $2, 'credit', $3)
-        RETURNING transaction_id
-      `;
-      // prettier-ignore
-      const { rows: [tx] } = await client.query(query, [accountId, amount, `Deposit ${amount} USD`]);
+      await this._updateBalance(client, accountId, amount, 'credit');
+      const tx = await this._createTransaction(client, { accountId, amount, type: 'deposit', direction: 'credit', status: 'success' });
       await client.query('COMMIT');
       return tx;
-    } catch (err) {
+    } catch (error) {
       await client.query('ROLLBACK');
-      throw err;
+      console.error('Deposit failed:', error.message);
+      await this._createTransaction(this.pool, { accountId, amount, type: 'deposit', direction: 'credit', status: 'failed' });
+      throw error;
     } finally {
       client.release();
     }
@@ -116,27 +119,73 @@ class TransactionRepository {
       if (account.balance < amount) {
         throw new Error('Insufficient funds');
       }
-      const updateBalanceQuery = `
-        UPDATE accounts
-        SET balance = balance - $1
-        WHERE account_id = $2
-      `
-      await client.query(updateBalanceQuery, [amount, accountId]);
-      const insertTXQuery = `
-        INSERT INTO transactions (account_id, type, amount, direction, message)
-        VALUES ($1, 'withdraw', $2, 'debit', $3)
-        RETURNING transaction_id
-      `
-      // prettier-ignore
-      const { rows: [tx] } = await client.query(insertTXQuery, [accountId, amount, `Withdraw ${amount} USD`]);
+      await this._updateBalance(client, accountId, amount, 'debit');
+      const tx = await this._createTransaction(client, { accountId, amount, type: 'withdraw', direction: 'debit', status: 'success' });
       await client.query('COMMIT');
       return tx;
-    } catch (err) {
+    } catch (error) {
       await client.query('ROLLBACK');
-      throw err;
+      console.error('Withdraw failed:', error.message);
+      await this._createTransaction(this.pool, { accountId, amount, type: 'withdraw', direction: 'debit', status: 'failed' });
+      throw error;
     } finally {
       client.release();
     }
+  }
+
+  async _createTransaction(clientOrPool, { accountId, senderAccountId, receiverAccountId, amount, type, direction, status, referenceId }) {
+    let message;
+    if (type === 'transfer') {
+      message = direction === 'debit' ? `Preparing to send ${amount} USD to account ${receiverAccountId}` : `Preparing to receive ${amount} USD from account ${senderAccountId}`;
+    } else if (type === 'deposit') {
+      message = `Deposit ${amount} USD`;
+    } else if (type === 'withdraw') {
+      message = `Withdraw ${amount} USD`;
+    } else {
+      throw new Error(`Unsupported transaction type: ${type}`);
+    }
+
+    const sql = `
+      INSERT INTO transactions 
+      (account_id, type, amount, direction, reference_id, status, message)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING transaction_id
+    `;
+    // prettier-ignore
+    const { rows: [tx] } = await clientOrPool.query(sql, [accountId, type, amount, direction, referenceId, status, message]);
+    return tx;
+  }
+
+  async _updateTxStatus(client, { transactionId, senderAccountId, receiverAccountId, amount, status, direction, errorMessage = null }) {
+    let message;
+    if (status === 'success') {
+      // prettier-ignore
+      message = direction === 'debit'
+        ? `Sent ${amount} USD to account ${receiverAccountId}`
+        : `Received ${amount} USD from account ${senderAccountId}`;
+    } else if (status === 'failed') {
+      message = `Transfer failed: ${errorMessage || 'Unknown error'}`;
+    } else {
+      throw new Error(`Unsupported transaction status: ${status}`);
+    }
+
+    const query = `
+      UPDATE transactions
+      SET status = $1, message = $2
+      WHERE transaction_id = $3
+    `;
+    await client.query(query, [status, message, transactionId]);
+  }
+
+  async _updateBalance(client, accountId, amount, operation) {
+    const operator = operation === 'debit' ? '-' : '+';
+
+    const query = `
+    UPDATE accounts
+    SET balance = balance ${operator} $1
+    WHERE account_id = $2
+  `;
+    await client.query(query, [amount, accountId]);
   }
 }
 
