@@ -22,11 +22,9 @@ class UserService {
 
   async update(userId, email, fields) {
     const foundUser = await userRepository.findUserWithAccountsByEmail(email);
-    console.log(foundUser)
     if (!foundUser) {
       throw new Error('There is no user with this user Id.');
     }
-    console.log('stexa')
     const user = await userRepository.update(userId, foundUser.password, fields);
     return user;
   }

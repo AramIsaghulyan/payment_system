@@ -1,8 +1,35 @@
 const db = require('../../configs/postgres');
+const { client: redisClient } = require('../../configs/redis');
+const { REDIS_TTL } = require('../../utils/constants');
 
 class TransactionRepository {
   constructor() {
     this.pool = db.getPool();
+  }
+
+  async findByAccountId(accountId) {
+    const redisKey = `account:${accountId}`;
+    const cachedData = await redisClient.get(redisKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
+    const query = `
+      SELECT 
+        transaction_id,
+        account_id,
+        type,
+        amount,
+        direction,
+        status,
+        message,
+        created_at
+      FROM transactions
+      WHERE account_id = $1
+      ORDER BY created_at DESC;
+    `;
+    const { rows } = await this.pool.query(query, [accountId]);
+    await redisClient.set(redisKey, JSON.stringify(rows), { EX: REDIS_TTL });
+    return rows;
   }
 
   async transfer(senderAccountId, receiverAccountId, amount) {
@@ -78,7 +105,7 @@ class TransactionRepository {
       if (creditTx?.transaction_id) {
         await this._updateTxStatus(this.pool, { transactionId: creditTx.transaction_id, status: 'failed', errorMessage: error.message });
       }
-      throw err;
+      throw error;
     } finally {
       client.release();
     }
@@ -136,7 +163,10 @@ class TransactionRepository {
   async _createTransaction(clientOrPool, { accountId, senderAccountId, receiverAccountId, amount, type, direction, status, referenceId }) {
     let message;
     if (type === 'transfer') {
-      message = direction === 'debit' ? `Preparing to send ${amount} USD to account ${receiverAccountId}` : `Preparing to receive ${amount} USD from account ${senderAccountId}`;
+      message =
+        direction === 'debit'
+          ? `Preparing to send ${amount} USD to account ${receiverAccountId}`
+          : `Preparing to receive ${amount} USD from account ${senderAccountId}`;
     } else if (type === 'deposit') {
       message = `Deposit ${amount} USD`;
     } else if (type === 'withdraw') {

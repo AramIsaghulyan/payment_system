@@ -3,18 +3,20 @@ require('dotenv').config({ quiet: true });
 const app = require('../src/app');
 const db = require('../src/configs/postgres');
 const { connectRedis } = require('../src/configs/redis');
+const { initPgListener } = require('../src/database/pgListener');
 
 async function start() {
   try {
     await db.connect();
     await connectRedis();
+    await initPgListener();
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
       console.log(`${process.env.APP_NAME} is running on port ${PORT} (${process.env.NODE_ENV})`);
     });
-  } catch (err) {
-    console.error('Failed to start server:', err);
+  } catch (error) {
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }

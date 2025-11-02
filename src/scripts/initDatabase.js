@@ -9,8 +9,8 @@ async function initDatabase() {
     const sql = fs.readFileSync(filePath, 'utf8');
     await pool.query(sql);
     console.log('Database schema initialized successfully.');
-  } catch (err) {
-    console.error('Error initializing database:', err.message);
+  } catch (error) {
+    console.error('Error initializing database:', error.message);
   } finally {
     await db.close();
   }

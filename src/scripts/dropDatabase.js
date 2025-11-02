@@ -9,8 +9,8 @@ async function dropDatabase() {
     const sql = fs.readFileSync(filePath, 'utf8');
     await pool.query(sql);
     console.log('Database schema dropped successfully.');
-  } catch (err) {
-    console.error('Error dropping database:', err.message);
+  } catch (error) {
+    console.error('Error dropping database:', error.message);
   } finally {
     await db.close();
   }

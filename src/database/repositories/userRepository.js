@@ -34,7 +34,6 @@ class UserRepository {
   try {
     const query = this.generateSelectByAction('user_id');
     const { rows: [user] } = await this.pool.query(query, [userId]);
-    console.log(user)
     return user;
   } catch (error) {
     console.error('DB error in find user by id:', error.message);

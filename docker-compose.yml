@@ -1,0 +1,46 @@
+services:
+  # 🚀 Node.js App
+  app:
+    build: .
+    container_name: payment_app
+    command: npm start       # ⬅️ запускаем только сервер
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped  # ⬅️ не перезапускайся бесконечно, если всё ок
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # 🐘 PostgreSQL
+  db:
+    image: postgres:16
+    container_name: payment_postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # 🔴 Redis
+  redis:
+    image: redis:7-alpine
+    container_name: payment_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+# 🧱 Named volumes
+volumes:
+  pg_data:
+  redis_data:

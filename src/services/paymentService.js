@@ -4,6 +4,14 @@ const transactionRepository = require('../database/repositories/transactionRepos
 class PaymentService {
   constructor() {}
 
+  async findByAccountId(userId, accountId) {
+    const account = await accountService.findByUserId(userId);
+    if (!account) {
+      throw new Error('There is no account with this user Id.');
+    }
+    return await transactionRepository.findByAccountId(accountId);
+  }
+
   async transfer(userId, senderCardNumber, receiverCardNumber, amount) {
     const sender = await accountService.verifySenderAccount(userId, senderCardNumber);
     if (!sender) {

@@ -41,7 +41,6 @@ router.patch(
   requestMiddleware(async (req, res) => {
     try {
       const { userId, email } = req.user;
-      console.log(email)
       const fields = await validate(req.body, userValidation.update);
       const user = await userService.update(userId, email, fields);
       return res.status(200).json(new Response(user));

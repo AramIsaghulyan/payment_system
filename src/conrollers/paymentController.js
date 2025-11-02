@@ -8,6 +8,20 @@ const Response = require('../utils/response');
 
 const router = express.Router();
 
+router.get(
+  '/',
+  authMiddleware,
+  requestMiddleware (async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { accountId } = await validate(req.body, paymentValidation.findByAccountId);
+    const result = await paymentService.findByAccountId(userId, accountId);
+    return res.status(200).json(new Response(result));
+  } catch (error) {
+    return res.status(400).json(new Response({}, error));
+  }
+}));
+
 router.post(
   '/transfer',
   authMiddleware,

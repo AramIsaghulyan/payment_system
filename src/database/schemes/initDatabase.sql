@@ -102,6 +102,36 @@ BEFORE UPDATE ON transactions
 FOR EACH ROW
 EXECUTE FUNCTION update_transactions_updated_at();
 
+CREATE OR REPLACE FUNCTION notify_transaction_change()
+RETURNS trigger AS $$
+DECLARE
+  payload JSON;
+BEGIN
+  payload := json_build_object(
+    'transaction_id', NEW.transaction_id,
+    'account_id', NEW.account_id,
+    'type', NEW.type,
+    'amount', NEW.amount,
+    'direction', NEW.direction,
+    'status', NEW.status,
+    'message', NEW.message,
+    'reference_id', NEW.reference_id,
+    'created_at', NEW.created_at,
+    'updated_at', NEW.updated_at
+  );
+
+  PERFORM pg_notify('transaction_changes', payload::text);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_notify_transaction_change
+AFTER INSERT OR UPDATE ON transactions
+FOR EACH ROW
+EXECUTE FUNCTION notify_transaction_change();
+
+
 
 -- ==========================================================
 -- INSERT INTO FOR USERS

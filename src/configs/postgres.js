@@ -16,8 +16,8 @@ class Database {
     try {
       await this.pool.query('SELECT 1');
       console.log('Connected to PostgreSQL');
-    } catch (err) {
-      console.error('PostgreSQL connection error:', err.message);
+    } catch (error) {
+      console.error('PostgreSQL connection error:', error.message);
       process.exit(1);
     }
   }

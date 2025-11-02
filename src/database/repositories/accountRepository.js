@@ -17,8 +17,8 @@ class AccountRepository {
       const { rows: [account] } = await this.pool.query(insertAccount, [userId, cardNumber]);
       return account;
     } catch (error) {
-      console.error('DB error in create account:', err.message);
-      throw new Error(`Database error: ${err.message}`);
+      console.error('DB error in create account:', error.message);
+      throw new Error(`Database error: ${error.message}`);
     }
   }
 
@@ -32,8 +32,8 @@ class AccountRepository {
       const { rows: [account] } = await this.pool.query(query, [userId, cardNumber]);
       return account;
     } catch (error) {
-      console.error('DB error in verify sender account:', err.message);
-      throw new Error(`Database error: ${err.message}`);
+      console.error('DB error in verify sender account:', error.message);
+      throw new Error(`Database error: ${error.message}`);
     }
   }
 
@@ -47,8 +47,8 @@ class AccountRepository {
       const { rows: [account] } = await this.pool.query(query, [cardNumber]);
       return account;
     } catch (error) {
-      console.error('DB error in valid card number:', err.message);
-      throw new Error(`Database error: ${err.message}`);
+      console.error('DB error in valid card number:', error.message);
+      throw new Error(`Database error: ${error.message}`);
     }
   }
 
@@ -66,8 +66,8 @@ class AccountRepository {
       const { rows: [account] } = await this.pool.query(query, [userId]);
       return account;
     } catch (error) {
-      console.error('DB error in find by user Id:', err.message);
-      throw new Error(`Database error: ${err.message}`);
+      console.error('DB error in find by user Id:', error.message);
+      throw new Error(`Database error: ${error.message}`);
     }
   }
 }
