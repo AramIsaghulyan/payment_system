@@ -4,6 +4,7 @@ const requestMiddleware = require('../middlewares/requestMiddleware');
 const { validate } = require('../configs/joi');
 const authValidation = require('../validations/authValidation');
 const Response = require('../utils/response');
+const { StatusCodes } = require('http-status-codes');
 
 const router = express.Router();
 
@@ -15,7 +16,10 @@ router.post(
       const token = await authService.generateToken(email, password);
       return res.status(200).json(new Response(token));
     } catch (error) {
-      return res.status(400).json(new Response({}, error));
+      if (error.message?.toLowerCase().includes('invalid')) {
+        return res.status(StatusCodes.UNAUTHORIZED).json(new Response({}, 'Invalid email or password'));
+      }
+      return res.status(StatusCodes.BAD_REQUEST).json(new Response({}, error));
     }
   })
 );

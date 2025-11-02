@@ -5,6 +5,7 @@ const requestMiddleware = require('../middlewares/requestMiddleware');
 const { validate } = require('../configs/joi');
 const userValidation = require('../validations/userValidation');
 const Response = require('../utils/response');
+const { StatusCodes } = require('http-status-codes');
 
 const router = express.Router();
 
@@ -15,9 +16,9 @@ router.get(
     try {
       const { userId } = req.user;
       const user = await userService.findUserWithAccountsById(userId);
-      return res.status(200).json(new Response(user));
+      return res.status(StatusCodes.OK).json(new Response(user));
     } catch (error) {
-      return res.status(400).json(new Response({}, error));
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(new Response({}, error));
     }
   })
 );
@@ -28,9 +29,9 @@ router.post(
     try {
       const { name, surname, email, password } = await validate(req.body, userValidation.create);
       const user = await userService.create(name, surname, email, password);
-      return res.status(200).json(new Response(user));
+      return res.status(StatusCodes.CREATED).json(new Response(user));
     } catch (error) {
-      return res.status(400).json(new Response({}, error));
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(new Response({}, error));
     }
   })
 );
@@ -43,9 +44,9 @@ router.patch(
       const { userId, email } = req.user;
       const fields = await validate(req.body, userValidation.update);
       const user = await userService.update(userId, email, fields);
-      return res.status(200).json(new Response(user));
+      return res.status(StatusCodes.OK).json(new Response(user));
     } catch (error) {
-      return res.status(400).json(new Response({}, error));
+      return res.status(StatusCodes.BAD_REQUEST).json(new Response({}, error));
     }
   })
 );

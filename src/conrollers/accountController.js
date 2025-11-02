@@ -3,6 +3,7 @@ const accountService = require('../services/accountService');
 const authMiddleware = require('../middlewares/authMiddleware');
 const requestMiddleware = require('../middlewares/requestMiddleware');
 const Response = require('../utils/response');
+const { StatusCodes } = require('http-status-codes');
 
 const router = express.Router();
 
@@ -13,9 +14,9 @@ router.get(
     try {
       const { userId } = req.user;
       const user = await accountService.create(userId);
-      return res.status(200).json(new Response(user));
+      return res.status(StatusCodes.OK).json(new Response(user));
     } catch (error) {
-      return res.status(400).json(new Response({}, error));
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(new Response({}, error));
     }
   })
 );
@@ -27,9 +28,9 @@ router.post(
     try {
       const { userId } = req.user;
       const user = await accountService.create(userId);
-      return res.status(200).json(new Response(user));
+      return res.status(StatusCodes.CREATED).json(new Response(user));
     } catch (error) {
-      return res.status(400).json(new Response({}, error));
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(new Response({}, error));
     }
   })
 );
