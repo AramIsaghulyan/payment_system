@@ -32,6 +32,10 @@ docker-compose up --build -d
 
 # For regular startups (without rebuilding images), you can simply run:
 docker-compose up -d
+```
 
 ## Stop Application
+```bash
+# Stop application
 docker-compose down
+```
