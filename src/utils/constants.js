@@ -1,0 +1,4 @@
+const REDIS_TTL = 86400;
+const PASSWORD_HASH_ROUNDS = 12;
+
+module.exports = { REDIS_TTL, PASSWORD_HASH_ROUNDS };
