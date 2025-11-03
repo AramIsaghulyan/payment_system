@@ -13,9 +13,9 @@ class AccountService {
     return account;
   }
 
-  async verifySenderAccount(userId, cardNumber) {
-    const verifiedAccount = await accountRepository.verifySenderAccount(userId, cardNumber);
-    return verifiedAccount;
+  async verifyCardNumber(userId, cardNumber) {
+    const verify = await accountRepository.verifyCardNumber(userId, cardNumber);
+    return verify;
   }
 
   async isValidCardNumber(cardNumber) {

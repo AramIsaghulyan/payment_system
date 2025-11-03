@@ -45,8 +45,8 @@ router.post(
   requestMiddleware(async (req, res) => {
     try {
       const { userId } = req.user;
-      const { amount } = await validate(req.body, paymentValidation.deposit);
-      const result = await paymentService.deposit(userId, amount);
+      const { cardNumber, amount } = await validate(req.body, paymentValidation.deposit);
+      const result = await paymentService.deposit(userId, cardNumber, amount);
       return res.status(StatusCodes.OK).json(new Response(result));
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json(new Response({}, error));
@@ -60,8 +60,8 @@ router.post(
   requestMiddleware(async (req, res) => {
     try {
       const { userId } = req.user;
-      const { amount } = await validate(req.body, paymentValidation.withdraw);
-      const result = await paymentService.withdraw(userId, amount);
+      const { cardNumber, amount } = await validate(req.body, paymentValidation.withdraw);
+      const result = await paymentService.withdraw(userId, cardNumber, amount);
       return res.status(StatusCodes.OK).json(new Response(result));
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json(new Response({}, error));

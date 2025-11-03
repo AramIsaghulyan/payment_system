@@ -7,7 +7,7 @@ class TransactionRepository {
     this.pool = db.getPool();
   }
 
-  async findByAccountId(accountId) {
+  async findByAccountId(userId, accountId) {
     const redisKey = `account:${accountId}`;
     const cachedData = await redisClient.get(redisKey);
     if (cachedData) {
@@ -15,19 +15,20 @@ class TransactionRepository {
     }
     const query = `
       SELECT 
-        transaction_id,
-        account_id,
-        type,
-        amount,
-        direction,
-        status,
-        message,
-        created_at
-      FROM transactions
-      WHERE account_id = $1
+        t.transaction_id,
+        t.account_id,
+        t.type,
+        t.amount,
+        t.direction,
+        t.status,
+        t.message,
+        t.created_at
+      FROM transactions t
+      JOIN accounts a ON a.account_id = t.account_id
+      WHERE t.account_id = $1 AND a.user_id = $2 
       ORDER BY created_at DESC;
     `;
-    const { rows } = await this.pool.query(query, [accountId]);
+    const { rows } = await this.pool.query(query, [accountId, userId]);
     await redisClient.set(redisKey, JSON.stringify(rows), { EX: REDIS_TTL });
     return rows;
   }

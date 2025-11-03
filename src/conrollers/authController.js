@@ -16,7 +16,7 @@ router.post(
       const token = await authService.generateToken(email, password);
       return res.status(200).json(new Response(token));
     } catch (error) {
-      if (error.message?.toLowerCase().includes('invalid')) {
+      if (error.message?.toLowerCase().includes('Invalid')) {
         return res.status(StatusCodes.UNAUTHORIZED).json(new Response({}, 'Invalid email or password'));
       }
       return res.status(StatusCodes.BAD_REQUEST).json(new Response({}, error));

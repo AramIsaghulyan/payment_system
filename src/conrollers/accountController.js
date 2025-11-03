@@ -13,7 +13,7 @@ router.get(
   requestMiddleware(async (req, res) => {
     try {
       const { userId } = req.user;
-      const user = await accountService.create(userId);
+      const user = await accountService.findByUserId(userId);
       return res.status(StatusCodes.OK).json(new Response(user));
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(new Response({}, error));

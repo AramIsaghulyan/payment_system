@@ -10,10 +10,10 @@ class AccountRepository {
     try {
       const cardNumber = generateCardNumber();
       const insertAccount = `
-      INSERT INTO accounts (user_id, card_number)
-      VALUES ($1, $2)
-      RETURNING account_id, card_number, balance, currency;
-    `;
+        INSERT INTO accounts (user_id, card_number)
+        VALUES ($1, $2)
+        RETURNING account_id, card_number, balance, currency;
+      `;
       const { rows: [account] } = await this.pool.query(insertAccount, [userId, cardNumber]);
       return account;
     } catch (error) {
@@ -22,17 +22,17 @@ class AccountRepository {
     }
   }
 
-  async verifySenderAccount(userId, cardNumber) {
+  async verifyCardNumber(userId, cardNumber) {
     try {
       const query = `
-      SELECT account_id AS "accountId"
-      FROM accounts
-      WHERE user_id = $1 AND card_number = $2;
-    `;
-      const { rows: [account] } = await this.pool.query(query, [userId, cardNumber]);
-      return account;
+        SELECT account_id AS "accountId"
+        FROM accounts
+        WHERE user_id = $1 AND card_number IN ($2);
+      `;
+      const { rows } = await this.pool.query(query, [userId, cardNumber]);
+      return rows[0];
     } catch (error) {
-      console.error('DB error in verify sender account:', error.message);
+      console.error('DB error in verify account:', error.message);
       throw new Error(`Database error: ${error.message}`);
     }
   }
@@ -40,12 +40,12 @@ class AccountRepository {
   async isValidCardNumber(cardNumber) {
     try {
       const query = `
-      SELECT account_id AS "accountId"
-      FROM accounts
-      WHERE card_number IN ($1);
-    `;
-      const { rows: [account] } = await this.pool.query(query, [cardNumber]);
-      return account;
+        SELECT account_id AS "accountId"
+        FROM accounts
+        WHERE card_number IN ($1);
+      `;
+      const { rows } = await this.pool.query(query, [cardNumber]);
+      return rows[0];
     } catch (error) {
       console.error('DB error in valid card number:', error.message);
       throw new Error(`Database error: ${error.message}`);
@@ -63,8 +63,8 @@ class AccountRepository {
         FROM accounts
         WHERE user_id = $1;
       `;
-      const { rows: [account] } = await this.pool.query(query, [userId]);
-      return account;
+      const { rows } = await this.pool.query(query, [userId]);
+      return rows;
     } catch (error) {
       console.error('DB error in find by user Id:', error.message);
       throw new Error(`Database error: ${error.message}`);

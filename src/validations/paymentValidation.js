@@ -10,9 +10,11 @@ module.exports = {
     amount: Joi.number().required(),
   },
   deposit: {
+    cardNumber: Joi.string().required(),
     amount: Joi.number().required(),
   },
   withdraw: {
+    cardNumber: Joi.string().required(),
     amount: Joi.number().required(),
   },
 };
